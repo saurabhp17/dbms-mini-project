@@ -1,0 +1,193 @@
+from tkinter import *
+import tkinter
+from tkinter import messagebox
+from lib2to3.fixer_util import Number
+import mysql.connector as mysql
+
+
+top = tkinter.Tk()
+
+L = Label(top, text="WELCOME", height=3, width=55,font=("bold", 21, ))
+L.config(bg='yellow')
+L.grid(row=0,columnspan=5)
+L1 = Label(top, text="Book Name", height=2, width=25,font=("bold", 13, ))
+L1.grid(row=1,column=0)
+E1 = Entry(top, bd =1,justify = CENTER,width=35)
+E1.grid(row=1,column=1)
+L2 = Label(top, text="Author Name", height=2, width=25,font=("bold", 13, ))
+L2.grid(row=2,column=0)
+E2 = Entry(top, bd =1,justify = CENTER,width=35)
+E2.grid(row=2,column=1)
+L3 = Label(top, text="Price", height=2, width=25,font=("bold", 13, ))
+L3.grid(row=3,column=0)
+E3 = Entry(top, bd =1,justify = CENTER,width=35)
+E3.grid(row=3,column=1)
+L4 = Label(top, text="Available", height=2, width=25,font=("bold", 13, ))
+L4.grid(row=4,column=0)
+E4 = Entry(top, bd =1,justify = CENTER,width=35)
+E4.grid(row=4,column=1)
+ldview1=Label(top,text=" ")
+ldview1.grid(row=8,columnspan=2)
+ldview2=Label(top,text=" ")
+ldview2.grid(row=9,columnspan=2)
+ldview3=Label(top,text="Available books",fg='green',bg='light blue')
+ldview3.grid(row=10,columnspan=5)
+ldview4=Label(top,text=" ")
+ldview4.grid(row=9,columnspan=2)
+
+def buttonCallBack(selection):
+    print("Operation "+selection)
+    a = E1.get()
+    b = E2.get()
+    c = E3.get()
+    d = E4.get()
+    if selection in ('Insert'):
+        if a!="" and b!="" and c!="" and d!="" and (d=="yes" or d=="no" or d=="Yes"or d=="YES"or d=="No"or d=="NO"or d=="yes " or d=="no " or d=="Yes "or d=="YES "or d=="No "or d=="NO "):
+            db = mysql.connect(user='root', host='localhost', database='project', password='admin', use_unicode=True)
+            cursor = db.cursor()
+            cursor.execute("SELECT VERSION()")
+            data = cursor.fetchone()
+            print ("Database version : %s " % data)
+            try:
+                cursor.execute("INSERT INTO TEST2(BNAME,ANAME,PRICE,AVAILABLE) VALUES (%s,%s,%s,%s)" ,(a,b,c,d))
+                db.commit()
+            except:
+                db.rollback()
+                db.close()
+            print("Data Inserted properly "+a +"–"+b)
+            messagebox.showinfo("Inserted","Book added Successfully")
+        else:
+             messagebox.showinfo("Warning", "Fill all fields /n *Note:AVAILABLE field should be yes or no")
+
+    elif selection in ('Update'):
+        if a != "" and b!="" and c!="" and d!="" and (d=="yes" or d=="no" or d=="Yes"or d=="YES"or d=="No"or d=="NO"or d=="yes " or d=="no " or d=="Yes "or d=="YES "or d=="No "or d=="NO "):
+            db = mysql.connect(user='root', host='localhost', database='project', password='admin', use_unicode=True)
+            cursor = db.cursor()
+            cursor.execute("SELECT VERSION()")
+            data = cursor.fetchone()
+            print ("Database version : %s " % data)
+            try:
+                cursor.execute("UPDATE TEST2 SET ANAME=%s,PRICE=%s,AVAILABLE=%s WHERE BNAME=%s",(b,c,d,a))
+                cursor.close()
+                db.commit()
+            except:
+                db.rollback()
+                db.close()
+            print("Data Updated properly "+a +" "+b)
+            messagebox.showinfo("Update", "Book updated Successfully")
+        else:
+            messagebox.showinfo("Warning", "Please fill all fields")
+
+    elif selection in ('Delete'):
+        if a!="":
+            db = mysql.connect(user='root', host='localhost', database='project', password='admin', use_unicode=True)
+            cursor = db.cursor()
+            cursor.execute("SELECT VERSION()")
+            data = cursor.fetchone()
+            print ("Database version : %s " % data)
+            try:
+                cursor.execute("DELETE FROM TEST2 WHERE BNAME=%s",(a,))
+                db.commit()
+            except:
+                db.rollback()
+                db.close()
+            print("Data Deleted properly "+a)
+            messagebox.showinfo("Delete", "Book deleted Successfully")
+        else:
+            messagebox.showinfo("Warning", "Please provide name of book which you want to delete")
+
+    else:
+        db = mysql.connect(user='root', host='localhost', database='project', password='admin', use_unicode=True)
+        cursor = db.cursor()
+        cursor.execute("SELECT * FROM TEST2")
+        data = cursor.fetchall()
+        dbbook = Label(top, text='BOOK',fg='blue')
+        dbbook.grid(row=12, column=0)
+        dbauth = Label(top, text='AUTHOR',fg='blue')
+        dbauth.grid(row=12, column=1)
+        dbprice = Label(top, text='PRICE',fg='blue')
+        dbprice.grid(row=12, column=2)
+        dbavl = Label(top, text='AVAILABLE',fg='blue')
+        dbavl.grid(row=12, column=3)
+        i=13
+
+        for row in data:
+            if row[3] == 'yes' or  row[3] == 'Yes' or  row[3] == 'YES' or  row[3] == 'yes ' or  row[3] == 'Yes ' or  row[3] == 'YES ' :
+                book=row[0]
+                dbbook = Label(top, text=book)
+                dbbook.grid(row=i,column=0)
+                author=row[1]
+                dbauth = Label(top, text=author)
+                dbauth.grid(row=i, column=1)
+                price=row[2]
+                dbprice = Label(top, text=price)
+                dbprice.grid(row=i, column=2)
+                available=row[3]
+                dbavl = Label(top, text='Available',fg='green')
+                dbavl.grid(row=i, column=3)
+                i=i+1
+        j=i+1
+        ldview3 = Label(top, text="Unavailable books",fg='red',bg='light blue')
+        ldview3.grid(row=j, columnspan=5,pady=10)
+        j=j+1
+        db = mysql.connect(user='root', host='localhost', database='project', password='admin', use_unicode=True)
+        cursor = db.cursor()
+        cursor.execute("SELECT * FROM TEST2")
+        data = cursor.fetchall()
+        dbbook = Label(top, text='BOOK',fg='blue')
+        dbbook.grid(row=j, column=0)
+        dbauth = Label(top, text='AUTHOR',fg='blue')
+        dbauth.grid(row=j, column=1)
+        dbprice = Label(top, text='PRICE',fg='blue')
+        dbprice.grid(row=j, column=2)
+        dbavl = Label(top, text='AVAILABLE',fg='blue')
+        dbavl.grid(row=j, column=3)
+        j=j+1
+        for row in data:
+            if row[3] == 'no' or  row[3] == 'No' or  row[3] == 'NO' or  row[3] == 'no ' or  row[3] == 'No ' or  row[3] == 'NO ' :
+                book=row[0]
+                dbbook = Label(top, text=book)
+                dbbook.grid(row=j,column=0)
+                author=row[1]
+                dbauth = Label(top, text=author)
+                dbauth.grid(row=j, column=1)
+                price=row[2]
+                dbprice = Label(top, text=price)
+                dbprice.grid(row=j, column=2)
+                available=row[3]
+                dbavl = Label(top, text='Not Available',fg='red')
+                dbavl.grid(row=j, column=3)
+                j=j+1
+
+        db.close()
+
+BInsert = tkinter.Button(text ='Insert', command=lambda: buttonCallBack('Insert'), height=2, width=35)
+BInsert.config(bg='light green')
+BInsert.grid(row=5,column=0,pady=10)
+
+BUpdate = tkinter.Button(text ='Update', command=lambda: buttonCallBack('Update'), height=2, width=35)
+BUpdate.config(bg='light yellow')
+BUpdate.grid(row=5,column=1,pady=10)
+
+BDelete = tkinter.Button(text ='Delete', command=lambda: buttonCallBack('Delete'), height=2, width=35)
+BDelete.config(bg='red')
+BDelete.grid(row=6,column=0,pady=10)
+
+BUpdateDB = tkinter.Button(text ='Show Database', command=lambda: buttonCallBack('UpdateDB'), height=2, width=35)
+BUpdateDB.config(bg='light blue')
+BUpdateDB.grid(row=7,columnspan=2,pady=20)
+
+
+label = Label(top)
+top.title('Library Management')
+# top.config(bg='light blue')
+top.geometry('850x780')
+top.mainloop()
+
+
+
+
+
+# table is created using following query
+# BNAME is primary key. i.e if we insert book with name already exist then it is ignored by database
+# CREATE TABLE TEST2(BNAME CHAR(20) UNIQUE,ANAME CHAR(20),PRICE CHAR(20),AVAILABLE CHAR(5));
